@@ -12,13 +12,14 @@
 
 const char* wifi_ssid = "amp-modular-1";
 const char* wifi_password = "";
-const char* server_address = "192.168.0.101";
+const char* server_address = "192.168.0.100";
 
 // perform one-time setup of the ESP on boot
 void setup()
 {
+    pinMode(14, OUTPUT);
     Serial.begin(115200);
-    Serial.printf("Connecting to SSID %s.", ssid);
+    Serial.printf("Connecting to SSID %s.", wifi_ssid);
     WiFi.begin(wifi_ssid, wifi_password);
 
     while (WiFi.status() != WL_CONNECTED)
@@ -46,14 +47,20 @@ void loop() {
 
     String payload;
 
-    while (client.available()){
+    payload = client.readStringUntil('\n');
+    Serial.printf("Payload: %s.", payload);
+
+    if (payload[1] == 'N')
     {
-        payload = client.readStringUntil('\n');
-        Serial.printf("Payload recieved. payload=\"%s\"", payload);
+        digitalWrite(14, HIGH);
+    }
+    if (payload[1] == 'F')
+    {
+        digitalWrite(14, LOW);
     }
 
     Serial.println("Closing connection to remote host.");
     client.stop();
 
-    Serial.println(json);
+    Serial.println(payload);
 }
