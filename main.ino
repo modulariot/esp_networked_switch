@@ -1,51 +1,59 @@
+/*
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * ESP 8266 IoT Client
+ * modulariot.xyz
+ *
+ * Contacts an IoT server to receive state changes.
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 
-const char* ssid     =  "amp-modular-1";
-const char* password =  "";
+const char* wifi_ssid = "amp-modular-1";
+const char* wifi_password = "";
+const char* server_address = "192.168.0.101";
 
-const char* host = "192.168.0.101";
+// perform one-time setup of the ESP on boot
+void setup()
+{
+    Serial.begin(115200);
+    Serial.printf("Connecting to SSID %s.", ssid);
+    WiFi.begin(wifi_ssid, wifi_password);
 
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+    }
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-
-  Serial.printf("Connecting to %s ", ssid);
-  WiFi.begin(ssid,password);
-  while(WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println(" connected");
-
-  Serial.printf("Client started, IP is %s \n", WiFi.localIP().toString().c_str());
+    Serial.println("Connected to network.");
+    Serial.printf("Client ready. DHCP IP is %s \n.", WiFi.localIP().toString().c_str());
 }
 
+// execute this loop continuously
 void loop() {
-  delay(5000);
 
-  Serial.print("connecting to ");
-  Serial.println(host);
+    delay(5000);
+    Serial.printf("Connecting to remote host %s.", server_address);
+    WiFiClient client;
+    const int server_port = 8266;
 
-  //Use WiFiClient clalss to create TCP connections
+    if (!client.connect(server_address, server_port))
+    {
+        Serial.println("Connection to remote host failed.");
+        return;
+    }
 
-  WiFiClient client;
-  const int port = 8266;
-  if(!client.connect(host,port)){
-    Serial.println("connection failed");
-    return;
-  }
-  String json;
-  while(client.available()){
-   json = client.readStringUntil('\n');
-   Serial.println(json);
-  }
+    String payload;
 
-  Serial.println("closing connection");
-  client.stop();
-  
-  Serial.println(json);
-  
+    while (client.available()){
+    {
+        payload = client.readStringUntil('\n');
+        Serial.printf("Payload recieved. payload=\"%s\"", payload);
+    }
+
+    Serial.println("Closing connection to remote host.");
+    client.stop();
+
+    Serial.println(json);
 }
