@@ -17,7 +17,7 @@ const char* server_address = "192.168.0.100";
 // perform one-time setup of the ESP on boot
 void setup()
 {
-    pinMode(14, OUTPUT);
+    pinMode(5, OUTPUT);
     Serial.begin(115200);
     Serial.printf("Connecting to SSID %s.", wifi_ssid);
     WiFi.begin(wifi_ssid, wifi_password);
@@ -52,11 +52,11 @@ void loop() {
 
     if (payload[1] == 'N')
     {
-        digitalWrite(14, HIGH);
+        digitalWrite(5, HIGH);
     }
     if (payload[1] == 'F')
     {
-        digitalWrite(14, LOW);
+        digitalWrite(5, LOW);
     }
 
     Serial.println("Closing connection to remote host.");
